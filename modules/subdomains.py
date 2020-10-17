@@ -84,7 +84,7 @@ def altdns_wrapper(outdir, words_txt, massdns_base):
 
     # also generate permutation with dnsgen
     system(f'cat {outdir}/domains_wo_wildcards.txt > {outdir}/dnsgen.in')
-    cmd = f'cat {outdir}/dnsgen.in | dnsgen - >> altdns.tmp'
+    cmd = f'cat {outdir}/dnsgen.in | dnsgen - >> {outdir}/altdns.tmp'
     print('[*]', cmd)
     system(cmd)
     remove_dups('altdns.tmp', outdir)
@@ -102,6 +102,15 @@ def altdns_wrapper(outdir, words_txt, massdns_base):
 def aquatone_wrapper(outdir):
     # screenshoting
     system(f'cat {outdir}/subdomains.txt | aquatone -http-timeout 30000 -out {outdir}/aquatone.d -ports 80,443')
+
+def cleanup(outdir):
+    system(f'rm {outdir}/altdns-massdns.out')
+    system(f'rm {outdir}/altdns.in')
+    system(f'rm {outdir}/amass.out')
+    system(f'rm {outdir}/dnsgen.in')
+    system(f'rm {outdir}/massdns.out')
+    system(f'rm {outdir}/virustotal.out')
+    system(f'rm {outdir}/wildcard_domains.txt')
 
 #subdomains
 # 1. amass
@@ -135,7 +144,7 @@ def subdomains(domains, outdir):
     # basic bruteforce
     massdns_wrapper(outdir, massdns_base, all_txt)
     # generating the permutations basen on found subdomains and bruteforcing again via massdns
-    altdns_wrapper(outdir, words_txt, massdns_base)
+    # altdns_wrapper(outdir, words_txt, massdns_base)
     # merging
     system(f'cat {outdir}/virustotal.out >> {outdir}/subdomains.txt')
     system(f'cat {outdir}/amass.out >> {outdir}/subdomains.txt')
@@ -149,6 +158,7 @@ def subdomains(domains, outdir):
     system(f'cat {outdir}/virustotal.out >> {outdir}/subdomains.txt')
     system(f'cat {outdir}/amass.out >> {outdir}/subdomains.txt')
     remove_dups('subdomains.txt', outdir)
+    cleanup(outdir)
     
     # screenshoting
     aquatone_wrapper(outdir)
