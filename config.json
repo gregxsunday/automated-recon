@@ -1,0 +1,5 @@
+{
+  "massdns": "/opt/massdns",
+  "all.txt": "/opt/wordlists/all.txt",
+  "altdns-words.txt": "/opt/wordlists/words.txt"
+}
