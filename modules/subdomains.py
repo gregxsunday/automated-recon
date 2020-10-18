@@ -61,6 +61,10 @@ def massdns_wrapper(outdir, massdns_base, all_txt):
 
     # generating brute list and passing it to the massdns
     dns_resolver_path = os.path.dirname(os.path.realpath(__file__)) + '/../dns-resolvers/good-resolvers.txt'
+    if not os.path.isfile(dns_resolver_path):
+        fix_dns_path = os.path.dirname(os.path.realpath(__file__)) + '/../dns-resolvers/good-resolvers.txt'
+        cmd = f'./{fix_dns_path}'
+        system(cmd)
     cmd = f'python2.7 {massdns_base}/scripts/subbrute.py {all_txt} {domains_str} | {massdns_base}/bin/massdns -r {dns_resolver_path} -t A -o S -q -w {outdir}/massdns.out'
     print('[*]', cmd)
     system(cmd)
@@ -84,10 +88,24 @@ def altdns_wrapper(outdir, words_txt, massdns_base):
 
     # also generate permutation with dnsgen
     system(f'cat {outdir}/domains_wo_wildcards.txt > {outdir}/dnsgen.in')
-    cmd = f'cat {outdir}/dnsgen.in | dnsgen - >> {outdir}/altdns.tmp'
+    cmd = f'cat {outdir}/dnsgen.in | dnsgen - >> {outdir}/dnsgen.out'
     print('[*]', cmd)
     system(cmd)
     remove_dups('altdns.tmp', outdir)
+
+
+    # try to do it with amass instead of massdns
+    with open(f'{outdir}/provided_domains.txt', 'r') as infile:
+        domains = infile.read().split('\n')
+    domains_str = ','.join(domains)
+    cmd = f'amass enum -brute -w {outdir}/dnsgen.out -d {domains_str} | tee {outdir}/amass2.out'
+    print('[*]', cmd)
+    system(cmd)
+    cmd = f'cat {outdir}/amass2.out >> {outdir}/subdomains.txt'
+    print('[*]', cmd)
+    system(cmd)
+    remove_dups('subdomains.txt', outdir)
+    return
 
     # passing the generated list to massdns to resolve
     dns_resolver_path = os.path.dirname(os.path.realpath(__file__)) + '/../dns-resolvers/good-resolvers.txt'
@@ -138,13 +156,13 @@ def subdomains(domains, outdir):
 
     print('[*] Discovering subdomains')
     # uses multiple sources of domains
-    amass_wrapper(domains, outdir)
+    # amass_wrapper(domains, outdir)
     # more of a backup to amass (which is prone to run out of memory)
     virustotal_wrapper(domains, outdir)
     # basic bruteforce
-    massdns_wrapper(outdir, massdns_base, all_txt)
+    # massdns_wrapper(outdir, massdns_base, all_txt)
     # generating the permutations basen on found subdomains and bruteforcing again via massdns
-    # altdns_wrapper(outdir, words_txt, massdns_base)
+    altdns_wrapper(outdir, words_txt, massdns_base)
     # merging
     system(f'cat {outdir}/virustotal.out >> {outdir}/subdomains.txt')
     system(f'cat {outdir}/amass.out >> {outdir}/subdomains.txt')
