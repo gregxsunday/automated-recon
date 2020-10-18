@@ -80,11 +80,11 @@ def altdns_wrapper(outdir, words_txt, massdns_base):
     cmd = f'sh {os.path.dirname(os.path.realpath(__file__))}/../scripts/filter_dns_wildcards.sh {outdir}/subdomains.txt'
     system(cmd)
 
-    system(f'cat {outdir}/domains_wo_wildcards.txt > {outdir}/altdns.in')
-    # altdns generates permutaions based on found ones
-    cmd = f'python2.7 -m altdns -i {outdir}/altdns.in -o {outdir}/altdns.tmp -w {words_txt}'
-    print('[*]', cmd)
-    system(cmd)
+    # system(f'cat {outdir}/domains_wo_wildcards.txt > {outdir}/altdns.in')
+    # # altdns generates permutaions based on found ones
+    # cmd = f'python2.7 -m altdns -i {outdir}/altdns.in -o {outdir}/altdns.tmp -w {words_txt}'
+    # print('[*]', cmd)
+    # system(cmd)
 
     # also generate permutation with dnsgen
     system(f'cat {outdir}/domains_wo_wildcards.txt > {outdir}/dnsgen.in')
