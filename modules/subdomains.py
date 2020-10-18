@@ -156,7 +156,7 @@ def subdomains(domains, outdir):
 
     print('[*] Discovering subdomains')
     # uses multiple sources of domains
-    # amass_wrapper(domains, outdir)
+    amass_wrapper(domains, outdir)
     # more of a backup to amass (which is prone to run out of memory)
     virustotal_wrapper(domains, outdir)
     # basic bruteforce
